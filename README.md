@@ -44,4 +44,4 @@ python app.py
 
 ![Alt Text](https://github.com/Kenils/Description_Based_Person_Identification/blob/master/readme_images/output.gif)
 
-*Retrieving a person using torso color red and gender female.*
+*Retrieving a person using torso color blue and gender female.*
