@@ -1,6 +1,7 @@
 # Description_Based_Person_Identification
 
 ![Alt Text](https://github.com/Kenils/Description_Based_Person_Identification/blob/master/readme_images/Person_Retrieval.jpeg)
+
 **Locating a particular  person in a given surveillance video using a set of soft-biometric queries such as height,color and gender.**
 
 ## Installation
@@ -25,6 +26,7 @@ python app.py
 ```
 
 ![Alt Text](https://github.com/Kenils/Description_Based_Person_Identification/blob/master/readme_images/queries_screen.png)
+
 **Browse the video from your local disk and enter the soft-biometric features required to locate the desired person.**
 
 ### Instructions
