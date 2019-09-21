@@ -40,3 +40,8 @@ python app.py
 
 2) Output frames with bounding box of the desired person are stored in /output/. folder.
 
+## Output Frames
+
+![Alt Text](https://github.com/Kenils/Description_Based_Person_Identification/blob/master/readme_images/output.gif)
+
+*Retrieving a person using torso color red and gender female.*
