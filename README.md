@@ -1,5 +1,7 @@
 # Description_Based_Person_Identification
 
+Implementation for [Person Retrieval in Surveillance Video using Height, Color and Gender](https://arxiv.org/abs/1810.05080)
+
 ![Alt Text](https://github.com/Kenils/Description_Based_Person_Identification/blob/master/readme_images/Person_Retrieval.jpeg)
 
 **Locating a particular  person in a given surveillance video using a set of soft-biometric queries such as height,color and gender.**
@@ -7,6 +9,9 @@
 ## Installation
 
 1) Clone this repository.
+```
+git clone https://github.com/Kenils/Description_Based_Person_Identification.git
+```
 
 2) In the repository, execute `pip install -r requirements.txt` to install all the necessary libraries.
 	
@@ -31,7 +36,7 @@ python app.py
 
 ### Instructions
 
-1) Height channel is not currently used as a filter due to it's dependance on camera parameters.
+1) Height channel is currently not used as a filter due to it's dependance on camera parameters.
 
-2) The output frames with bounding box of located person is stored in /output/. folder
+2) Output frames with bounding box of the desired person are stored in /output/. folder.
 
