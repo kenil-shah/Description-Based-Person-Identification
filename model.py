@@ -47,7 +47,7 @@ def log(text, array=None):
             array.min() if array.size else "",
             array.max() if array.size else "",
             array.dtype))
-    #print(text)
+    print(text)
 
 
 class BatchNorm(KL.BatchNormalization):
@@ -2217,7 +2217,7 @@ class MaskRCNN():
         for layer in layers:
             # Is the layer a model?
             if layer.__class__.__name__ == 'Model':
-                #print("In model: ", layer.name)
+                print("In model: ", layer.name)
                 self.set_trainable(
                     layer_regex, keras_model=layer, indent=indent + 4)
                 continue

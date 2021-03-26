@@ -1,3 +1,5 @@
+# Copyright (c) Hiren Galiyawala, Kenil Shah, Vandit Gajjar, and Mehul S. Raval.
+
 # '''
 # from keras.models import Model
 # from keras.layers import Input, merge, ZeroPadding2D

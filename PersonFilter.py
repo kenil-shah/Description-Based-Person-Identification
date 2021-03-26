@@ -1,10 +1,14 @@
+# Copyright (c) Hiren Galiyawala, Kenil Shah, Vandit Gajjar, and Mehul S. Raval.
+
 import os
 import sys
+import random
+import colorsys
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 ROOT_DIR = os.path.abspath("../")
 import modalities.HeightEstimation as ht
-from data_bridge import  *
 
 height_pass_index =[]
 # torso1_pass_index = []
@@ -12,8 +16,7 @@ height_pass_index =[]
 IMAGE_DIR = os.path.join(ROOT_DIR, "images")
 sys.path.append(ROOT_DIR)  # To find local version of the library
 
-
-def torso_mask_coordinates(y1, x1, y2, x2, mask, torso_type):
+def torso_mask_coordinates(y1,x1,y2,x2,mask,torso_type):
     person_height = y2 - y1
 
     if torso_type == "Long Sleeve":
@@ -70,8 +73,8 @@ def torso_mask_coordinates(y1, x1, y2, x2, mask, torso_type):
     return a
 
 
-def height_estimation(x1, y1, x2, y2, mask, camera):
-    actual_height = ht.main(x1, y1, x2, y2, mask, camera)
+def height_estimation(x1,y1,x2,y2,mask,camera):
+    actual_height = ht.main(x1,y1,x2,y2,mask,camera)
     actual_height = int(actual_height)
     return actual_height
 
@@ -83,11 +86,8 @@ INPUT:
     min_height:The minimum height of the person as given in the input query
     max_height: The maximum height of the person as given in the input query 
 '''
-
-
-def height_filter(actual_height, max_height, min_height, i):
+def height_filter(actual_height, min_height, max_height, i):
     flag = 0
-
     if actual_height < (min_height - 10):
         flag = 1
     if actual_height > (max_height + 10):
@@ -105,10 +105,8 @@ INPUT:
     torso_type: Type of the torso which person is wearing
     ColorModel: Densenet Color Model
 '''
-
-
-def color_classification(image, x1, y1, x2, y2, masks, torso_type, ColorModel):
-    coord = torso_mask_coordinates(y1, x1, y2, x2, masks, torso_type)
+def color_classification(image, x1,y1,x2,y2, masks, torso_type, ColorModel):
+    coord = torso_mask_coordinates(y1,x1,y2,x2,masks,torso_type)
 
     upper = coord[0]
     legs = coord[1]
@@ -151,26 +149,18 @@ INPUT:
     torso_color: Original color query of the person
 '''
 
-
-def color_filter(i, color_class1, color_class2, torso_color, color_flag):
+def color_filter(i, color_class1, color_class2, torso_color):
+    # print("i",i)
     array_name = None
     if color_class1 == torso_color:
+        #torso1_pass_index.append(i)
         array_name = "torso1_pass_index"
-        print("Color 1 Detected")
-    if color_flag == 1:
-        if color_class1 == "Pink":
-            array_name = "torso1_pass_index"
-            print("Color 1 Detected")
-    if color_flag == 2:
-        if color_class1 == "Grey":
-            array_name = "torso1_pass_index"
-            print("Color 1 Detected")
+        print("Color Detected")
 
-    if color_flag == 0:
-        if color_class2 == torso_color:
-            #torso2_pass_index.append(i)
-            print("Color 2 Detected")
-            array_name = "torso2_pass_index"
+    if color_class2 == torso_color:
+        #torso2_pass_index.append(i)
+        print("Color Detected")
+        array_name = "torso2_pass_index"
 
     #print(torso1_pass_index, "Torso 1")
     #print(torso2_pass_index, "Torso 2")
@@ -187,8 +177,7 @@ INPUT:
     GenderModel = Dense-net Model for Gender Classification 
 '''
 
-
-def gender_classification(x1, y1, x2, y2, img, GenderModel):
+def gender_classification(x1,y1,x2,y2,img,GenderModel):
     gender_image = img[y1:y2, x1:x2]
     cv2.imwrite("modalities/gender/images/1.png", gender_image)
 
@@ -221,65 +210,32 @@ INPUT:
     attributes = Person Queries
 '''
 
+def person_identification(frame_name, frame, rois, masks, class_ids, scores, class_names, color_model=None, gender_model = None, text_file=None, output_storage_path=None, attributes=None):
 
-def person_identification(frame_name, frame, rois, masks, class_ids, scores, class_names, color_model=None, gender_model = None, text_file=None, output_storage_path=None):
-    data_bridge = Singleton(Data_bridge)
-    torso_color = data_bridge.color_entered
-    height_range = data_bridge.hgt_entered
-
-    if height_range == "130-160":
-        min_height = 130
-        max_height = 160
-    if height_range == "150-170":
-        min_height = 150
-        max_height = 170
-    if height_range == "160-180":
-        min_height = 160
-        max_height = 180
-    if height_range == "170-190":
-        min_height = 170
-        max_height = 190
-    if height_range == "180-210":
-        min_height = 180
-        max_height = 210
-
-    print("The height value is :-", height_range)
-    color_flag = 0
-    if torso_color == "Red":
-        color_flag = 1
-    if torso_color == "Black":
-        color_flag = 2
-    gender_type = data_bridge.gender_entered
-    torso_type = "Short Sleeve"  # ['Long Sleeve','Short Sleeve','No Sleeve']
-    camera_calibaration = "1"  # [0 = Camera calibration NOT available, 1 = Camera calibration available]
-
-    attributes = [camera_calibaration, min_height, max_height, torso_color, torso_type, gender_type]
     height_pass_index = []
     torso1_pass_index = []
     torso2_pass_index = []
     person_id = 1
     camera_calibration, min_height, max_height, torso_color, torso_type, gender_type = attributes
-    camera = data_bridge.camera_entered
+    camera = 2
     boxes = rois
     N = rois.shape[0]
     font = cv2.FONT_HERSHEY_SIMPLEX
     fontColor = (0, 0, 255)
     lineType = 2
+    #print("In beginning torso1_pass_index,torso2_pass_index",torso1_pass_index,torso2_pass_index)
     if not N:
         print("\n*** No instances to display *** \n")
     else:
         assert boxes.shape[0] == masks.shape[-1] == class_ids.shape[0]
     img = frame
-    print("***********************************************************************************************************")
-    print("camera_calibaration:", camera_calibration)
+    print("camera_calibaration:",camera_calibration)
     # print("torso1_pass_index ")
     if camera_calibration == "1":
-        cv2.imwrite("test.jpg", frame)
-        mid_frame = cv2.imread("test.jpg")
         # height_pass_index = []
         # torso1_pass_index = []
         # torso2_pass_index = []
-        print("Frame_name", frame_name)
+        print("frame_name",frame_name)
         for i in range(N):
             mask = masks[:, :, i]
             if not (np.any(boxes[i])):
@@ -289,28 +245,22 @@ def person_identification(frame_name, frame, rois, masks, class_ids, scores, cla
             if scores[i] < 0.8:
                 continue
             y1, x1, y2, x2 = boxes[i]
-            cv2.cv2.rectangle(mid_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            actual_height = height_estimation(x1, y1, x2, y2, mask, camera)
-            person_index, flag = height_filter(actual_height, max_height, min_height, i)
-            print("The value of heigth flag is :-", flag)
+            actual_height = height_estimation(x1, y1, x2, y2, mask,camera)
+            person_index, flag = height_filter(actual_height, max_height, min_height,i)
             if flag == 1:
                 continue
             try:
-                color_class1, color_class2 = color_classification(img, x1, y1, x2, y2, mask, torso_type, color_model)
+                color_class1, color_class2 = color_classification(img, x1,y1,x2,y2, mask, torso_type, color_model)
             except:
                 continue
-            array_name = color_filter(i, color_class1, color_class2, torso_color,color_flag)
+            array_name = color_filter(i, color_class1, color_class2, torso_color)
             if array_name == "torso1_pass_index":
                 torso1_pass_index.append(i)
             if array_name == "torso2_pass_index":
                 torso2_pass_index.append(i)
-        cv2.imwrite("intermediate_outputs/"+str(frame_name)+".jpg", mid_frame)
-        print("The value of Torso 1 pass index:-", torso1_pass_index)
-        print("The value of Torso 2 pass index:-", torso2_pass_index)
 
         final_torso = torso1_pass_index
         if len(torso1_pass_index) == 1:
-            print(torso1_pass_index, "======================================")
             print("Determined using Torso Color 1")
             y1, x1, y2, x2 = boxes[torso1_pass_index[0]]
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
@@ -329,6 +279,7 @@ def person_identification(frame_name, frame, rois, masks, class_ids, scores, cla
                 person_id = person_id + 1
 
             if len(torso2_pass_index) == 0:
+
                 N = boxes.shape[0]
                 print("Number of boxes=", N)
                 for i in range(N):
@@ -344,35 +295,38 @@ def person_identification(frame_name, frame, rois, masks, class_ids, scores, cla
                         color_class1, color_class2 = color_classification(img, x1, y1, x2, y2, mask, torso_type, color_model)
                     except:
                         continue
-                    array_name = color_filter(i, color_class1, color_class2, torso_color,color_flag)
+                    array_name = color_filter(i, color_class1, color_class2, torso_color)
                     if array_name == "torso1_pass_index":
                         torso1_pass_index.append(i)
                     if array_name == "torso2_pass_index":
                         torso2_pass_index.append(i)
-
                 final_torso = torso1_pass_index
                 if len(torso1_pass_index) == 1:
-                    print("Determined using Torso Color 1 without height filter")
+                    print("Determined using Torso Color 1")
                     y1, x1, y2, x2 = boxes[torso1_pass_index[0]]
                     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.putText(img, str(person_id), (x1, y1 + 25),font, 1, (0, 0, 255), 2, lineType)
+                    cv2.putText(img,str(person_id),(x1,y1 + 25),font,1,(0,0,255),2,lineType)
                     text_file.write(str(frame_name) + "," +str(person_id)+ "," + str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "\n")
                     person_id = person_id + 1
 
                 if len(torso1_pass_index) == 0:
                     final_torso = torso2_pass_index
                     if len(torso2_pass_index) == 1:
-                        print("Determined using Torso Color 2 without height filter")
+                        print("Determined using Torso Color 2")
                         y1, x1, y2, x2 = boxes[torso2_pass_index[0]]
                         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                         cv2.putText(img, str(person_id), (x1, y1 + 25), font, 1, (0, 0, 255), 2, lineType)
-                        text_file.write(str(frame_name)+"," +str(person_id) + "," + str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "\n")
+                        text_file.write(str(frame_name)+"," +str(person_id)+ "," + str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "\n")
                         person_id = person_id + 1
 
+
     else:
-        print("Frame_name:", frame_name)
-        cv2.imwrite("test.jpg", frame)
-        mid_frame = cv2.imread("test.jpg")
+        # print("N =", N)
+
+        # height_pass_index = []
+        # torso1_pass_index = []
+        # torso2_pass_index = []
+        print("frame_name:", frame_name)
         for i in range(N):
             # print("i",i)
             mask = masks[:, :, i]
@@ -383,10 +337,10 @@ def person_identification(frame_name, frame, rois, masks, class_ids, scores, cla
             if scores[i] < 0.8:
                 continue
             y1, x1, y2, x2 = boxes[i]
-            cv2.rectangle(mid_frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            # print("y1,x1,y2,x2",y1,x1,y2,x2)
             try:
                 color_class1, color_class2 = color_classification(img, x1, y1, x2, y2, mask, torso_type, color_model)
-                array_name = color_filter(i, color_class1, color_class2, torso_color, color_flag)
+                array_name = color_filter(i, color_class1, color_class2, torso_color)
             except:
                 continue
             if array_name == "torso1_pass_index":
@@ -394,7 +348,6 @@ def person_identification(frame_name, frame, rois, masks, class_ids, scores, cla
             if array_name == "torso2_pass_index":
                 torso2_pass_index.append(i)
             # print("torso_1_pass_index , torso_2_pass_index",torso1_pass_index,torso2_pass_index)
-        cv2.imwrite("intermediate_outputs/"+str(frame_name)+".jpg", mid_frame)
 
         final_torso = torso1_pass_index
         if len(torso1_pass_index) == 1:
@@ -417,7 +370,7 @@ def person_identification(frame_name, frame, rois, masks, class_ids, scores, cla
 
     if len(final_torso) > 1:
         i = 0
-        print("final_torso:", final_torso)
+        print("final_torso:",final_torso)
         while i < len(final_torso):
             print("Gender Channel")
             if not (np.any(boxes[final_torso[i]])):
@@ -426,7 +379,6 @@ def person_identification(frame_name, frame, rois, masks, class_ids, scores, cla
                 continue
             y1, x1, y2, x2 = boxes[final_torso[i]]
             gender_name = gender_classification(x1, y1, x2, y2, img, gender_model)
-            print("The gender determined is:-",gender_name)
             if gender_type == gender_name:
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(img, str(person_id), (x1, y1 + 25), font, 1, (0, 0, 255), 2, lineType)

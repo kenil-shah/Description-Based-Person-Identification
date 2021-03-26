@@ -55,7 +55,7 @@ def height_calculation(head_point, feet_point,camera):
     Yw = xyCoordinates[1,:]
     Xu = undistortedHeadPoints[0]
     Yu = undistortedHeadPoints[1]
-    h1 = (np.dot(Xw,(C[1,0]-(Yu*C[2,0]))) +np.dot(Yw, (C[1, 1]-(Yu*C[2, 1])))+C[1, 3]-(Yu*C[2,3]))
+    h1 = (np.dot(Xw,(C[1,0]-(Yu*C[2,0]))) +np.dot(Yw,(C[1,1]-(Yu*C[2,1])))+C[1,3]-(Yu*C[2,3]))
     h2=((Yu*C[2,2])-C[1,2])
     height=np.true_divide(h1,h2)
     height = height*100;
@@ -70,7 +70,7 @@ def height_calculation(head_point, feet_point,camera):
 def variables(camera):
     camera_no=camera
     global focal,kappa1,cx,cy,tx,ty,sx,tz,rx,ry,rz,Yf,C
-    if camera_no == 1:
+    if camera_no==1:
         focal = 5.567576
         kappa1 = 0.003937
         cx = 351.767835
